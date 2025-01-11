@@ -140,9 +140,16 @@
             <p>Tel: +265 999 036 912 / +265 992 951 112 / +265 992 901 339</p>
         </div>
 
-        <p>
-            <a href="{{ url_for('admin') }}" style="color: white; text-decoration: none;">&copy; 2025 Malikebu Enterprise</a>
-        </p>
+        {% if session.get('user_id') %}
+            <p>
+                <a href="{{ url_for('admin') }}" style="color: white; text-decoration: none;">&copy; 2025 Malikebu Enterprise</a>
+            </p>
+        {% if session.get('user_id') %}
+            <p>
+                <a href="{{ url_for('admin') }}" style="color: white; text-decoration: none;">&copy; 2025 Malikebu Enterprise</a>
+            </p>
+        {% endif %}
+
     </footer>
 
     <!-- Bootstrap JS, jQuery, and Popper.js -->
