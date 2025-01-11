@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malikebu Enterprise</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+        }
+        header {
+            padding: 3rem;
+            color: white;
+            text-align: center;
+        }
+        header h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 3rem;
+        }
+        header p {
+            font-size: 1.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            animation: marquee 10s linear infinite;
+        }
+        @keyframes marquee {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(-100%);
+            }
+        }
+        section {
+            margin-top: 3rem;
+        }
+        section h2 {
+            background-color: #1e3c72;
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: bold;
+        }
+        .product-card {
+            background-color: #f1f5f8;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .product-card h3 {
+            color: #1e3c72;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .product-card p {
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+        .product-image {
+            max-width: 150px;
+            max-height: 150px;
+            object-fit: cover;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+        }
+        .availability {
+            font-weight: bold;
+            color: #38a169;
+        }
+        .unavailable {
+            font-weight: bold;
+            color: #e53e3e;
+        }
+        .price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-top: 0.5rem;
+        }
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: white;
+        }
+        .contact-details {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+        }
+        .contact-details p {
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Malikebu Enterprise</h1>
+        <p>Your Trusted Supply of Cement & Rime Always Available. Contact us to shop now!</p>
+    </header>
+
+    <section class="container">
+        <h2>Our Products</h2>
+        <div class="row">
+            {% for product in products %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="product-card">
+                    <h3>{{ product.name }}</h3>
+                    <p>{{ product.description }}</p>
+                    {% if product.image_filename %}
+                        <img src="{{ url_for('static', filename='images/' + product.image_filename) }}"
+                             alt="{{ product.name }}"
+                             class="product-image">
+                    {% endif %}
+                    {% if product.available %}
+                        <p class="availability">{{ product.name.split(':')[0] }} Alipo</p>
+                    {% else %}
+                        <p class="unavailable">{{ product.name.split(':')[0] }} Watha</p>
+                    {% endif %}
+                    <p class="price">Price: {{ product.price }} MWK</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <footer>
+        <div class="contact-details">
+            <p><strong>Contact Us:</strong></p>
+            <p>Email: <a href="mailto:ptrmlkbu20@gmail.com" style="color: white;">ptrmlkbu20@gmail.com</a></p>
+            <p>Tel: +265 999 036 912 / +265 992 951 112 / +265 992 901 339</p>
+        </div>
+
+        <p>
+            <a href="{{ url_for('admin') }}" style="color: white; text-decoration: none;">&copy; 2025 Malikebu Enterprise</a>
+        </p>
+    </footer>
+
+    <!-- Bootstrap JS, jQuery, and Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
