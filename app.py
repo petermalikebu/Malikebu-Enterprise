@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
+from functools import wraps
+from flask_migrate import Migrate
 
 # Setup the application and database
 os.makedirs('static/images', exist_ok=True)
@@ -11,6 +13,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///products.db'  # SQLite databa
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'supersecretkey'  # For flash messages
 db = SQLAlchemy(app)
+
+migrate = Migrate(app, db)
 
 # User and Product models
 class User(db.Model):
@@ -27,62 +31,62 @@ class Product(db.Model):
     price = db.Column(db.Float, nullable=False)
     image_filename = db.Column(db.String(120), nullable=True)  # Ensure this line exists
 
-# Create tables if they don't exist
-with app.app_context():
-    db.create_all()
-
-# User login check
-def login_required(f):
-    def wrap(*args, **kwargs):
-        if 'user_id' not in session:
-            flash('You need to log in first!', 'danger')
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return wrap
-
-# Admin access check
+# Decorator to ensure the user is an authenticated admin
 def admin_required(f):
-    def wrap(*args, **kwargs):
-        user_id = session.get('user_id')
-        user = User.query.get(user_id)
-        if not user or not user.is_admin:
-            flash('You are not authorized to access this page!', 'danger')
-            return redirect(url_for('home'))
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'admin_authenticated' not in session:
+            return redirect(url_for('admin_password'))  # Redirect to password form if not authenticated
         return f(*args, **kwargs)
-    return wrap
+    return decorated_function
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+@app.route('/')
+def home():
+    # Check if the admin password is set
+    admin_user = User.query.filter_by(is_admin=True).first()
+    if admin_user is None:  # No admin user, redirect to admin password creation
+        return redirect(url_for('admin_password'))
 
-        user = User.query.filter_by(username=username).first()
-        if user and user.password == password:  # Simple password check (Use hashing for production)
-            session['user_id'] = user.id
-            flash(f'Welcome back, {username}!', 'success')
-            return redirect(url_for('home'))
-        else:
-            flash('Invalid credentials, please try again.', 'danger')
-    return render_template('login.html')
+    # Fetch products to display on the homepage
+    products = Product.query.all()  # Query all products from the database
+    return render_template('index.html', products=products)  # Pass products to the template
 
-@app.route('/admin-password', methods=['GET', 'POST'])
+@app.route('/admin_password', methods=['GET', 'POST'])
 def admin_password():
+    admin_user = User.query.filter_by(is_admin=True).first()
+
+    if admin_user:
+        # If admin already exists, redirect to admin login
+        return redirect(url_for('admin_login'))
+
     if request.method == 'POST':
         password = request.form['password']
-        if password == "malikebu_enterprise at 12@1q2w3e4r5t":
+        # Create the admin user with the password
+        new_admin = User(username="admin", password=password, is_admin=True)
+        db.session.add(new_admin)
+        db.session.commit()
+        flash('Admin account created successfully! Now login with the admin password.', 'success')
+        return redirect(url_for('admin_login'))
+
+    return render_template('admin_password.html')
+
+@app.route('/admin_login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        password = request.form['password']
+        admin_user = User.query.filter_by(is_admin=True).first()
+
+        if admin_user and admin_user.password == password:
             session['admin_authenticated'] = True
             return redirect(url_for('admin'))
         else:
-            flash('Incorrect password! Please try again.', 'danger')
-    return render_template('admin_password.html')
+            flash('Invalid password, please try again.', 'danger')
+
+    return render_template('admin_login.html')
 
 @app.route('/admin', methods=['GET', 'POST'])
-@login_required
 @admin_required  # Only admin can access
 def admin():
-    if 'admin_authenticated' not in session:
-        return redirect(url_for('admin_password'))  # Redirect to password form if not authenticated
     if request.method == 'POST':
         name = request.form['name']
         description = request.form['description']
@@ -117,7 +121,6 @@ def admin():
     return render_template('admin.html', products=products)
 
 @app.route('/delete/<int:product_id>', methods=['POST'])
-@login_required
 @admin_required  # Only admin can delete
 def delete_product(product_id):
     product = Product.query.get_or_404(product_id)
@@ -134,4 +137,6 @@ def logout():
     return redirect(url_for('home'))
 
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()  # Creates the tables in the database if not already created
     app.run(debug=True)

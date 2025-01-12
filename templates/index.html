@@ -10,9 +10,18 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom Styles -->
     <style>
+        /* Ensures that the body takes up the full height of the viewport */
         body {
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(to right, #1e3c72, #2a5298);
+            background-image: url('/static/images/background.jpg');
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed; /* This keeps the background fixed while scrolling */
+            margin: 0;
+            padding: 0;
+            min-height: 100vh; /* Makes the body fill the entire viewport */
+            display: flex;
+            flex-direction: column;
         }
         header {
             padding: 3rem;
@@ -42,6 +51,7 @@
         }
         section {
             margin-top: 3rem;
+            flex-grow: 1; /* Ensures this section expands to take available space */
         }
         section h2 {
             background-color: #1e3c72;
@@ -52,10 +62,11 @@
         }
         .product-card {
             background-color: #f1f5f8;
-            padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
             text-align: center;
+            margin-bottom: 1.5rem; /* Ensures spacing between cards */
         }
         .product-card h3 {
             color: #1e3c72;
@@ -67,10 +78,10 @@
             margin-bottom: 0.5rem;
         }
         .product-image {
-            max-width: 150px;
-            max-height: 150px;
+            max-width: 50%; /* Ensures image resizes to fit container */
+            height: auto;
             object-fit: cover;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
             border-radius: 0.5rem;
         }
         .availability {
@@ -91,6 +102,7 @@
             margin-top: 3rem;
             text-align: center;
             color: white;
+            padding: 1rem 0;
         }
         .contact-details {
             margin-top: 1rem;
@@ -98,6 +110,37 @@
         }
         .contact-details p {
             margin: 0.5rem 0;
+        }
+        /* Ensures that the footer stays at the bottom of the page */
+        footer {
+            margin-top: auto; /* Pushes the footer to the bottom */
+        }
+        /* Responsive adjustments */
+        @media (max-width: 767px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            header p {
+                font-size: 1rem;
+            }
+            section h2 {
+                font-size: 1.5rem;
+            }
+            .product-card {
+                padding: 1rem;
+            }
+            .product-card h3 {
+                font-size: 1.2rem;
+            }
+            .product-card p {
+                font-size: 0.9rem;
+            }
+            .price {
+                font-size: 1rem;
+            }
+            .product-image {
+                max-width: 90%; /* Make the image smaller on smaller screens */
+            }
         }
     </style>
 </head>
@@ -140,13 +183,17 @@
             <p>Tel: +265 999 036 912 / +265 992 951 112 / +265 992 901 339</p>
         </div>
 
+        <!-- Admin Button -->
         {% if session.get('user_id') %}
             <p>
                 <a href="{{ url_for('admin') }}" style="color: white; text-decoration: none;">&copy; 2025 Malikebu Enterprise</a>
             </p>
-        {% if session.get('user_id') %}
+        {% else %}
             <p>
-                <a href="{{ url_for('admin') }}" style="color: white; text-decoration: none;">&copy; 2025 Malikebu Enterprise</a>
+                <!-- Admin Login Button with an icon and subtle style -->
+                <a href="{{ url_for('admin_login') }}" class="btn btn-secondary admin-button">
+                    <i class="fas fa-shield-alt"></i> <!-- Add the shield icon -->
+                </a>
             </p>
         {% endif %}
 
